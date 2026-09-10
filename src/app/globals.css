@@ -1,0 +1,310 @@
+@import "tailwindcss";
+
+/*
+  LUSI Wedding — тёмная editorial-концепция (ver2).
+  Палитра снята пипеткой с макета refs/lusi-editorial-dark.png,
+  поэтому значения выглядят «некруглыми» — так и задумано.
+*/
+@theme {
+  /* фон секций: очень глубокий винный, почти чёрный */
+  --color-wine: #27090e;
+  --color-wine-deep: #1b0509;
+  /* тот же винный как цвет текста на светлом фоне */
+  --color-wine-ink: #3b0a10;
+  /* подложка киноплёнки */
+  --color-noir: #0b0a0a;
+  /* подложка незаполненного кадра на тёмном фоне */
+  --color-wine-lift: #331a1f;
+
+  --color-ivory: #f3ede1;
+  --color-ivory-deep: #e6dcc8;
+  --color-cream: #f7f2e9;
+
+  --color-gold: #c9a063;
+  --color-gold-soft: #cfb590;
+  --color-gold-dim: #a8814f;
+
+  /* единственный «сигнальный» цвет: ошибки в форме заявки */
+  --color-alert: #9c2b20;
+
+  /* Bodoni — только латиница: вордмарк и цифры. Кириллицы в нём нет. */
+  --font-display: var(--font-bodoni), "Didot", "Bodoni MT", serif;
+  --font-serif: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-tenor), system-ui, -apple-system, sans-serif;
+
+  --container-site: 1240px;
+
+  --text-h2: clamp(1.9rem, 4.6vw, 3.5rem);
+  --text-h2--line-height: 1.25;
+  --text-h3: clamp(1.5rem, 3.4vw, 2.75rem);
+  --text-h3--line-height: 1.25;
+  --text-lead: clamp(1rem, 1.6vw, 1.125rem);
+  --text-lead--line-height: 1.7;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.18em;
+}
+
+@layer base {
+  :root {
+    /* боковые поля страницы */
+    --gutter: 20px;
+    /* вертикальные отступы секции */
+    --section-y: clamp(3.5rem, 8vw, 6.5rem);
+    --header-h: 60px;
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --gutter: 28px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --gutter: 40px;
+      --header-h: 68px;
+    }
+  }
+
+  :root {
+    /*
+      Разрешает анимировать переход к height: auto. Без этого высоту
+      раскрывающегося блока не проанимировать — она неизвестна заранее.
+    */
+    interpolate-size: allow-keywords;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-wine);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    /* ни один блок не должен растягивать страницу вбок */
+    overflow-x: hidden;
+  }
+
+  /* якоря не должны уезжать под фиксированную шапку */
+  [id] {
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  /*
+    Крупный кегль просит более тонких волосяных линий, чем мелкий, —
+    за это у Bodoni отвечает ось оптического размера.
+  */
+  .font-display {
+    font-variation-settings: "opsz" 96;
+  }
+
+  /*
+    Лента киноплёнки. Дорожка содержит два одинаковых набора кадров
+    и сдвигается ровно на половину своей ширины — стык незаметен.
+  */
+  .film-track {
+    animation: film-slide 60s linear infinite;
+    will-change: transform;
+  }
+
+  .film-strip:hover .film-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes film-slide {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .film-track {
+      animation: none;
+    }
+  }
+
+  /*
+    Плавное раскрытие <details>.
+
+    Нативный <details> открывается рывком: содержимое просто появляется.
+    Псевдоэлемент ::details-content даёт до него добраться и разогнать
+    высоту от нуля. content-visibility переключается дискретно, поэтому
+    ему нужен allow-discrete — иначе содержимое исчезнет в первый же кадр
+    закрытия и высота поедет по пустоте.
+
+    Там, где браузер ещё не умеет ::details-content, блок откроется
+    мгновенно, как и раньше, — ничего не сломается.
+  */
+  .disclosure::details-content {
+    block-size: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      block-size 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 260ms ease,
+      content-visibility 420ms allow-discrete;
+  }
+
+  .disclosure[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .disclosure::details-content,
+    .disclosure[open]::details-content {
+      transition: none;
+    }
+  }
+
+  /*
+    Горизонтальная лента: прокручивается пальцем, но без видимой полосы
+    прокрутки — на телефоне она только мешает.
+  */
+  .rail {
+    scrollbar-width: none;
+  }
+
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* тонкая золотая черта — повторяющийся элемент макета */
+  .hairline {
+    display: block;
+    height: 1px;
+    background-color: var(--color-gold);
+    opacity: 0.75;
+  }
+}
+
+@layer components {
+  /*
+    Логотип — маска по альфа-каналу, а не картинка. Благодаря этому он
+    принимает цвет от currentColor: золотой в шапке, кремовый в подвале.
+  */
+  .logo-mask {
+    aspect-ratio: 579 / 117;
+    background-color: currentColor;
+    -webkit-mask-image: url("/logo.png");
+    mask-image: url("/logo.png");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+}
+
+/*
+  Переопределения для StaggeredMenu из React Bits.
+
+  Сам компонент (components/reactbits/) не трогаем — так его можно
+  обновить из реестра одной командой. Всё оформление живёт здесь.
+  Правила намеренно вне @layer: слои Tailwind проигрывают обычным
+  правилам, а компонент приходит со своим CSS-файлом.
+*/
+
+/* Меню должно лежать выше липкой шапки страницы. */
+.lusi-menu.staggered-menu-wrapper {
+  z-index: 60;
+}
+
+/* Шапка меню встаёт ровно на место шапки страницы. */
+.lusi-menu .staggered-menu-header {
+  height: var(--header-h);
+  padding: 0 var(--gutter);
+}
+
+.lusi-menu .sm-logo-img {
+  height: 24px;
+}
+
+/* Инверсия рассчитана на светлую панель, у нас она тёмная. */
+.lusi-menu[data-open] .sm-logo-img {
+  filter: none;
+}
+
+.lusi-menu .sm-toggle {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  gap: 0.75rem;
+}
+
+.lusi-menu .staggered-menu-panel {
+  background: var(--color-wine-deep);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: calc(var(--header-h) + 2.5rem) var(--gutter) 2.5rem;
+}
+
+/* Пункты — наша антиква, без капса и отрицательного трекинга. */
+.lusi-menu .sm-panel-list {
+  gap: 0.25rem;
+}
+
+.lusi-menu .sm-panel-item {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-cream);
+  padding-right: 0;
+  padding-left: 1.15em;
+}
+
+.lusi-menu .sm-panel-item:hover {
+  color: var(--color-gold);
+}
+
+/* Номер компонент рисует псевдоэлементом справа — переносим влево. */
+.lusi-menu .sm-panel-list[data-numbering] .sm-panel-item::after {
+  right: auto;
+  left: 0;
+  /*
+    Номер стоит на одной базовой линии с пунктом. Значение посчитано из
+    метрик: у пункта 32px Cormorant базовая линия на 29.3px от верха
+    строки, у номера 13px Bodoni — на 12.6px от его собственного верха.
+    Разница и есть смещение.
+  */
+  top: 1.05rem;
+  line-height: 1.2;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  color: var(--color-gold);
+  opacity: calc(var(--sm-num-opacity, 0) * 0.7);
+}

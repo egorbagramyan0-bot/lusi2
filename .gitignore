@@ -1,0 +1,18 @@
+/node_modules
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+.env*
+.vercel
+
+# Оригиналы съёмок: 173 МБ. Все нужные кадры уже лежат в public/images/
+# в веб-размере, поэтому исходники остаются только на диске.
+/weddings
+
+# Исходники, у которых в public/ лежит точная копия или производная.
+/hero.png
+/hero2.png
+/stol.png
+/heromob.png
