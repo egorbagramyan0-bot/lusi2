@@ -1,6 +1,8 @@
 /node_modules
 /.next/
 /out/
+# архив статической выгрузки для загрузки на хостинг
+*.zip
 /build
 *.tsbuildinfo
 next-env.d.ts
