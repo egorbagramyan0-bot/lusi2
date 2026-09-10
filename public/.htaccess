@@ -1,0 +1,33 @@
+# Настройки для обычного хостинга на Apache (Timeweb и подобные).
+# На Vercel и при запуске под Node этот файл просто не читается.
+
+# Страница 404 из статической выгрузки
+ErrorDocument 404 /404.html
+
+# Сжатие текстовых файлов
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml font/woff2
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Файлы сборки содержат хэш в имени и не меняются — кэшируем надолго
+  <FilesMatch "\.(js|css|woff2)$">
+    ExpiresDefault "access plus 1 year"
+    Header set Cache-Control "public, immutable"
+  </FilesMatch>
+
+  # Кадры меняются вместе с именем файла, их тоже можно держать долго
+  <FilesMatch "\.(jpg|jpeg|png|svg|webp)$">
+    ExpiresDefault "access plus 30 days"
+  </FilesMatch>
+
+  # А разметку перечитываем каждый раз, иначе правки не доедут
+  <FilesMatch "\.html$">
+    ExpiresDefault "access plus 0 seconds"
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

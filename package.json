@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3100",
     "build": "next build",
+    "build:static": "node scripts/build-static.mjs",
     "start": "next start --port 3100",
     "lint": "eslint"
   },
